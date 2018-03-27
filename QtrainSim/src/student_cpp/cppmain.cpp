@@ -5,6 +5,7 @@
 
 //Creation d'une locomotive
 static Locomotive locomotive;
+static Locomotive locomotive2;
 
 //Arret d'urgence
 void emergency_stop()
@@ -42,6 +43,14 @@ int cmain()
     locomotive.allumerPhares();
     locomotive.demarrer();
     locomotive.afficherMessage("Ready!");
+
+    //Initialisation de la locomotive
+    locomotive2.fixerNumero(2);
+    locomotive2.fixerVitesse(122);
+    locomotive2.fixerPosition(17, 18);
+    locomotive2.allumerPhares();
+    locomotive2.demarrer();
+    locomotive2.afficherMessage("Ready!");
 
     //Attente du passage sur les contacts
     for (int i = 0; i < parcours.size(); i++) {
