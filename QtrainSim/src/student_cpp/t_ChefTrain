@@ -1,0 +1,22 @@
+#ifndef T_CHEFTRAIN_H
+#define T_CHEFTRAIN_H
+
+#include <QThread>
+
+class t_ChefTrain : public QThread
+{
+public:
+    t_ChefTrain();
+
+    t_ChefTrain(int numero, int vitesse)():Locomotive(numero,vitesse){
+    }
+
+    void run() Q_DECL_OVERRIDE{
+
+    }
+
+private :
+    int priority;
+};
+
+#endif // T_LOCOMOTIVE_H
