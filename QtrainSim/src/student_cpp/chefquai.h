@@ -8,11 +8,14 @@
 class ChefQuai{
 
 private:
-    vector<vector<int>> OnSegmentsTrain;
+    std::vector<std::vector<int>> OnSegmentsTrain;
 
 public:
-    ChefQuai(){
 
+    ChefQuai(){
+        OnSegmentsTrain.resize(2);
+        OnSegmentsTrain.at(0).resize(2);
+        OnSegmentsTrain.at(1).resize(2);
     }
 
     bool isDispo(int numeroTrain, int posA, int posB){

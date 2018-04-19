@@ -1,5 +1,7 @@
 #include "ctrain_handler.h"
 #include "locomotive.h"
+#include "chefquai.h"
+#include "cheftrain.h"
 
 #include <QList>
 
@@ -27,6 +29,10 @@ int cmain()
     QList<int> parcours;
     parcours << 16 << 15 << 14 << 7 << 6 << 5 << 34 << 33 << 32 << 25 << 24;
 
+    //Initialisation d'un parcours Loco 2
+    QList<int> parcours2;
+    parcours << 13 << 15 << 14 << 7 << 6 << 5 << 34 << 33 <<  28 << 22 << 24 << 23;
+
     //Initialisation des aiguillages
     diriger_aiguillage(8,  DEVIE,       0);
     diriger_aiguillage(2,  DEVIE,       0);
@@ -44,7 +50,24 @@ int cmain()
     locomotive.demarrer();
     locomotive.afficherMessage("Ready!");
 
+    //Initialisation de la locomotive 2
+    locomotive2.fixerNumero(2);
+    locomotive2.fixerVitesse(15);
+    locomotive2.fixerPosition(14, 15);
+    locomotive2.allumerPhares();
+    locomotive2.demarrer();
+    locomotive2.afficherMessage("Ready!");
+
+
+    ChefQuai* chefQuai = new ChefQuai();
+    ChefTrain chefTrain(&locomotive, &parcours, chefQuai);
+    ChefTrain chefTrain2(&locomotive2, &parcours2, chefQuai);
+    chefTrain.start();
+    chefTrain2.start();
+
+
     //Attente du passage sur les contacts
+    /*
     for (int i = 0; i < parcours.size(); i++) {
         attendre_contact(parcours.at(i));
         afficher_message(qPrintable(QString("The engine no. %1 has reached contact no. %2.")
@@ -63,7 +86,9 @@ int cmain()
     afficher_message("Enter a command in the input field at the top of the window.");
     QString commande = getCommand();
     afficher_message(qPrintable(QString("Your command is: ") + commande));
-
+    */
+    chefTrain.wait();
+    chefTrain2.wait();
     return EXIT_SUCCESS;
 }
 
