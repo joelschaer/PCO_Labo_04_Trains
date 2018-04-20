@@ -27,11 +27,11 @@ int cmain()
 
     //Initialisation d'un parcours
     QList<int> parcours;
-    parcours << 16 << 15 << 14 << 7 << 6 << 5 << 34 << 33 << 32 << 25 << 24;
+    parcours << 16 << 15 << 14 << 7 << 6 << 5 << 34 << 33 << 32 << 25 << 24 << 23;
 
     //Initialisation d'un parcours Loco 2
     QList<int> parcours2;
-    parcours << 13 << 15 << 14 << 7 << 6 << 5 << 34 << 33 <<  28 << 22 << 24 << 23;
+    parcours2 << 13 << 15 << 14 << 7 << 6 << 1 << 31 << 33 <<  32 << 25 << 24 << 19;
 
     //Initialisation des aiguillages
     diriger_aiguillage(8,  DEVIE,       0);
@@ -43,27 +43,27 @@ int cmain()
     diriger_aiguillage(23, TOUT_DROIT,  0);
 
     //Initialisation de la locomotive
-    locomotive.fixerNumero(1);
-    locomotive.fixerVitesse(12);
+    locomotive.fixerNumero(0);
+    locomotive.fixerVitesse(10);
     locomotive.fixerPosition(16, 23);
     locomotive.allumerPhares();
-    locomotive.demarrer();
+    //locomotive.demarrer();
     locomotive.afficherMessage("Ready!");
 
     //Initialisation de la locomotive 2
-    locomotive2.fixerNumero(2);
-    locomotive2.fixerVitesse(15);
-    locomotive2.fixerPosition(14, 15);
+    locomotive2.fixerNumero(1);
+    locomotive2.fixerVitesse(8);
+    locomotive2.fixerPosition(13, 19);
     locomotive2.allumerPhares();
-    locomotive2.demarrer();
+    //locomotive2.demarrer();
     locomotive2.afficherMessage("Ready!");
 
 
     ChefQuai* chefQuai = new ChefQuai();
-    ChefTrain chefTrain(&locomotive, &parcours, chefQuai);
-    ChefTrain chefTrain2(&locomotive2, &parcours2, chefQuai);
-    chefTrain.start();
-    chefTrain2.start();
+    ChefTrain* chefTrain1 = new ChefTrain(&locomotive, &parcours, chefQuai);
+    ChefTrain* chefTrain2 = new ChefTrain(&locomotive2, &parcours2, chefQuai);
+    chefTrain1->start();
+    chefTrain2->start();
 
 
     //Attente du passage sur les contacts
@@ -87,8 +87,8 @@ int cmain()
     QString commande = getCommand();
     afficher_message(qPrintable(QString("Your command is: ") + commande));
     */
-    chefTrain.wait();
-    chefTrain2.wait();
+    chefTrain1->wait();
+    chefTrain2->wait();
     return EXIT_SUCCESS;
 }
 
