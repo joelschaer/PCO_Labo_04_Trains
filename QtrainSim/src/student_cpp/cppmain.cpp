@@ -44,7 +44,7 @@ int cmain()
 
     //Initialisation de la locomotive
     locomotive.fixerNumero(0);
-    locomotive.fixerVitesse(10);
+    locomotive.fixerVitesse(12);
     locomotive.fixerPosition(16, 23);
     locomotive.allumerPhares();
     //locomotive.demarrer();
@@ -52,7 +52,7 @@ int cmain()
 
     //Initialisation de la locomotive 2
     locomotive2.fixerNumero(1);
-    locomotive2.fixerVitesse(8);
+    locomotive2.fixerVitesse(15);
     locomotive2.fixerPosition(13, 19);
     locomotive2.allumerPhares();
     //locomotive2.demarrer();
