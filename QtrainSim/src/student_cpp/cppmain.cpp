@@ -23,9 +23,6 @@ static ChefTrain* chefTrain2;
 //Arret d'urgence
 void emergency_stop()
 {
-    chefTrain1->terminate();
-    chefTrain2->terminate();
-
     locomotive.arreter();
     locomotive2.arreter();
     afficher_message("\nSTOP!");
@@ -88,8 +85,8 @@ int cmain()
     // il suffit de mettre la priorité des deux locomotives à 0 pour supprimer l'utilisation de la voie d'évitement.
     ChefQuai* chefQuai = new ChefQuai();
 
-    chefTrain1 = new ChefTrain(&locomotive, &parcours, chefQuai, TRAIN_1, PRIO);
-    chefTrain2 = new ChefTrain(&locomotive2, &parcours2, chefQuai, TRAIN_2, PRIO);
+    chefTrain1 = new ChefTrain(&locomotive, &parcours, chefQuai, TRAIN_1);
+    chefTrain2 = new ChefTrain(&locomotive2, &parcours2, chefQuai, TRAIN_2);
     chefQuai->setPrioTrain(PRIO,PRIO);
 
     chefTrain2->setDev(8, &deviation);
@@ -109,19 +106,12 @@ int cmain()
         }
         if(command.compare("1") == 0){
             chefQuai->setPrioTrain(PRIO, PAS_PRIO);
-            chefTrain1->setPriorite(PRIO);
-            chefTrain2->setPriorite(PAS_PRIO);
-
         }
         if(command.compare("2") == 0){
             chefQuai->setPrioTrain(PAS_PRIO, PRIO);
-            chefTrain1->setPriorite(PAS_PRIO);
-            chefTrain2->setPriorite(PRIO);
         }
         if(command.compare("3") == 0){
             chefQuai->setPrioTrain(PRIO, PRIO);
-            chefTrain1->setPriorite(PRIO);
-            chefTrain2->setPriorite(PRIO);
         }
     }
 

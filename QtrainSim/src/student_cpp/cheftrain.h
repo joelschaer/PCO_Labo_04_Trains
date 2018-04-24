@@ -76,6 +76,8 @@ public:
     void runParcours(QList<int> *parcours, QList<int> *deviation1){
         bool libre;
 
+        loco->demarrer();
+
         for (int i = 0; i < parcours->size(); i++) {
 
                 // test si la prochaine et la surprochaine section est libre
@@ -87,7 +89,6 @@ public:
                 if(libre){
 
                     chef->regler_aiguillage(numeroTrain, parcours->at(i), SET_DEV_PAS);
-                    loco->demarrer();
 
                     attendre_contact(parcours->at(i));
                     chef->changeSegment(numeroTrain, parcours->at(i), sens);
@@ -95,10 +96,9 @@ public:
                     loco->afficherMessage(QString("I've reached contact no. %1.").arg(parcours->at(i)));
                 }
                 else{
-                    // le train dispose qu'une voie d'évitement
+                    // le train dispose qu'une voie d'évitement donc il l'utilise si la section critique lui est reffusée.
                     if(deviation1 != NULL){
                         loco->afficherMessage(qPrintable(QString("train devié")));
-                        loco->demarrer();
 
                         switch(parcours->at(i)){
                         case 33:
@@ -129,6 +129,9 @@ public:
                                 break;
                             }
                         }
+
+                        loco->demarrer();
+
                     }
                 }
 

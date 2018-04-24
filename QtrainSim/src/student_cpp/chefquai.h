@@ -32,6 +32,8 @@ public:
         mutex.acquire();
         if(numeroTrain == TRAIN_1){
             switch(nextPoint){
+            case 33:   // 24 et 33 nécessaire dans le cas ou un contact est sauté lors d'un arrêt
+            case 24:
             case 34:
             case 23:
                 diriger_aiguillage(21,  DEVIE, 0);
@@ -42,6 +44,8 @@ public:
         if(numeroTrain == TRAIN_2){
             if(dev == SET_DEV){
                 switch(nextPoint){
+                case 30:  // 20 et 30 nécessaire dans le cas ou un contact est sauté lors d'un arrêt
+                case 20:
                 case 31:
                 case 19:
                     diriger_aiguillage(22,  TOUT_DROIT, 0);
@@ -51,6 +55,8 @@ public:
             }
             else{
                 switch(nextPoint){
+                case 24:  // 24 et 33 nécessaire dans le cas ou un contact est sauté lors d'un arrêt
+                case 33:
                 case 31:
                 case 19:
                     diriger_aiguillage(21,  TOUT_DROIT, 0);
