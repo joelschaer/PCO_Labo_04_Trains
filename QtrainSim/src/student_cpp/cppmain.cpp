@@ -9,19 +9,22 @@
 static Locomotive locomotive;
 static Locomotive locomotive2;
 
-static ChefTrain* chefTrain0;
 static ChefTrain* chefTrain1;
+static ChefTrain* chefTrain2;
 
 
 
 #define TRAIN_1 1
 #define TRAIN_2 2
 
+#define PRIO 1
+#define PAS_PRIO 0
+
 //Arret d'urgence
 void emergency_stop()
 {
-    chefTrain0->terminate();
     chefTrain1->terminate();
+    chefTrain2->terminate();
 
     locomotive.arreter();
     locomotive2.arreter();
@@ -84,92 +87,49 @@ int cmain()
 
     // il suffit de mettre la priorité des deux locomotives à 0 pour supprimer l'utilisation de la voie d'évitement.
     ChefQuai* chefQuai = new ChefQuai();
-    chefTrain0 = new ChefTrain(&locomotive, &parcours, chefQuai, TRAIN_1, 1);
-    chefTrain1 = new ChefTrain(&locomotive2, &parcours2, chefQuai, TRAIN_2, 1);
-    chefTrain1->setDev(8, &deviation);
-    chefTrain0->start();
+
+    chefTrain1 = new ChefTrain(&locomotive, &parcours, chefQuai, TRAIN_1, PRIO);
+    chefTrain2 = new ChefTrain(&locomotive2, &parcours2, chefQuai, TRAIN_2, PRIO);
+    chefQuai->setPrioTrain(PRIO,PRIO);
+
+    chefTrain2->setDev(8, &deviation);
     chefTrain1->start();
+    chefTrain2->start();
+
+    afficher_message("commands are : 1 = train 1 prio , 2 = train 2 prio, 3 = no priority");
 
     while(true){
-        const char *cmd =  getCommand();
-        std::string command = std::string(cmd);
+
+        QString command = getCommand();
+        afficher_message(qPrintable(QString("Your command is: ") + command));
+
         if(command.compare("stop") == 0){
             emergency_stop();
             break;
         }
         if(command.compare("1") == 0){
-            chefTrain0->setPriorite(1);
-            chefTrain1->setPriorite(0);
+            chefQuai->setPrioTrain(PRIO, PAS_PRIO);
+            chefTrain1->setPriorite(PRIO);
+            chefTrain2->setPriorite(PAS_PRIO);
+
         }
         if(command.compare("2") == 0){
-            chefTrain0->setPriorite(0);
-            chefTrain1->setPriorite(1);
+            chefQuai->setPrioTrain(PAS_PRIO, PRIO);
+            chefTrain1->setPriorite(PAS_PRIO);
+            chefTrain2->setPriorite(PRIO);
         }
         if(command.compare("3") == 0){
-            chefTrain0->setPriorite(1);
-            chefTrain1->setPriorite(1);
+            chefQuai->setPrioTrain(PRIO, PRIO);
+            chefTrain1->setPriorite(PRIO);
+            chefTrain2->setPriorite(PRIO);
         }
     }
 
-    chefTrain0->wait();
     chefTrain1->wait();
-    return EXIT_SUCCESS;
-}
-
-
-/*
-//Fonction principale
-int cmain()
-{
-    afficher_message("Hit play to start the simulation...");
-
-    //Choix de la maquette
-    selection_maquette(MAQUETTE_B);
-
-    //Initialisation d'un parcours
-    QList<int> parcours;
-    parcours << 24 << 21 << 16 << 15 << 10 << 11 << 6 << 5;
-
-    //Initialisation des aiguillages
-    diriger_aiguillage(16, TOUT_DROIT,  0);
-    diriger_aiguillage(15, DEVIE,       0);
-    diriger_aiguillage(12, DEVIE,       0);
-    diriger_aiguillage(11, DEVIE,       0);
-    diriger_aiguillage(9,  TOUT_DROIT,  0);
-    diriger_aiguillage(5,  TOUT_DROIT,  0);
-    diriger_aiguillage(8,  DEVIE,       0);
-    diriger_aiguillage(7,  TOUT_DROIT,  0);
-    diriger_aiguillage(4,  TOUT_DROIT,  0);
-    diriger_aiguillage(3,  TOUT_DROIT,  0);
-
-    //Initialisation de la locomotive
-    locomotive.fixerNumero(1);
-    locomotive.fixerVitesse(12);
-    locomotive.fixerPosition(24, 5);
-    locomotive.allumerPhares();
-    locomotive.demarrer();
-    locomotive.afficherMessage("Ready!");
-
-    //Attente du passage sur les contacts
-    for (int i = 0; i < parcours.size(); i++) {
-        attendre_contact(parcours.at(i));
-        afficher_message(qPrintable(QString("The engine no. %1 has reached contact no. %2.")
-                                    .arg(locomotive.numero()).arg(parcours.at(i))));
-        locomotive.afficherMessage(QString("I've reached contact no. %1.").arg(parcours.at(i)));
-    }
-
-    //Arreter la locomotive
-    locomotive.arreter();
-    locomotive.afficherMessage("Yeah, piece of cake!");
+    chefTrain2->wait();
 
     //Fin de la simulation
     mettre_maquette_hors_service();
 
-    //Exemple de commande
-    afficher_message("Enter a command in the input field at the top of the window.");
-    QString commande = getCommand();
-    afficher_message(qPrintable(QString("Your command is: ") + commande));
-
     return EXIT_SUCCESS;
 }
-*/

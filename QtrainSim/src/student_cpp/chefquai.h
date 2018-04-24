@@ -18,13 +18,13 @@ class ChefQuai{
 private:
     std::vector<int> secCrit;
     QSemaphore mutex;
-    QSemaphore inCrit1, inCrit2;
 
+    int prioTrain1;
+    int prioTrain2;
 
 public:
 
-    ChefQuai():mutex(1), inCrit1(1), inCrit2(1){
-        //OnSegmentsTrain.resize(2);
+    ChefQuai() : mutex(1){
         secCrit = {33,24,0,-1}; // début section critique, fin section critique, 0: section libre / 1: utilisé, train dans la section
     }
 
@@ -74,14 +74,25 @@ public:
             posTab = 1;
         }
         mutex.acquire();
-        if(nextPoint == secCrit.at(posTab)){ // section critique 2
-            if(secCrit.at(2) == 0 || secCrit.at(3) == numeroTrain){
-                secCrit.at(2) = 1;
-                secCrit.at(3) = numeroTrain;
-                ok = true;
+        if(nextPoint == secCrit.at(posTab)){ // section critique
+            if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
+                if(secCrit.at(2) == 0 || secCrit.at(3) == numeroTrain){
+                    secCrit.at(2) = 1;
+                    secCrit.at(3) = numeroTrain;
+                    ok = true;
+                }
+                else{
+                    ok = false;
+                }
             }
             else{
-                ok = false;
+                // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
+                if(secCrit.at(3) == numeroTrain){
+                    ok = true;
+                }
+                else{
+                    ok = false;
+                }
             }
         }
         mutex.release();
@@ -104,6 +115,13 @@ public:
             secCrit.at(3) = -1;
         }
 
+        mutex.release();
+    }
+
+    void setPrioTrain (int prioTrain1, int prioTrain2){
+        mutex.acquire();
+        this->prioTrain1 = prioTrain1;
+        this->prioTrain2 = prioTrain2;
         mutex.release();
     }
 
