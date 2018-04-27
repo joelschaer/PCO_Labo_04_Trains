@@ -56,8 +56,8 @@ public:
             // changement de sens après deux tours
             if(nbTours == 2){
                 loco->arreter();
-                sleep(1);
                 loco->inverserSens();
+                sleep(2);
                 sens *= -1;
                 nbTours = 0;
             }
@@ -101,12 +101,14 @@ public:
                         loco->afficherMessage(qPrintable(QString("train devié")));
 
                         switch(parcours->at(i)){
+                        case 31:
                         case 33:
                             if(sens == 1){
                                 runDeviation(deviation1);
-                                i = parcours->length()-1;
+                                i = parcours->size()-1;
                             }
                             break;
+                        case 19:
                         case 24:
                             if(sens == -1){
                                 runDeviation(deviation1_inv);
@@ -118,7 +120,7 @@ public:
                     else{
                         loco->afficherMessage(qPrintable(QString("stop")));
                         loco->arreter();
-                        sleep(1);
+                        sleep(2);
 
                         // Quesiton pour le prof : si le train repart d'ici, il y aura incrément de i et donc on saute l'attente d'un contact
                         while(true){
@@ -134,9 +136,7 @@ public:
 
                     }
                 }
-
         }// fin for
-
     } // fin runParcours
 
     void runDeviation(QList<int> *deviation){
