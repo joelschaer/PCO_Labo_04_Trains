@@ -16,7 +16,12 @@
 class ChefQuai{
 
 private:
-    std::vector<int> secCrit;
+    //std::vector<int> secCrit;
+    int debutSection;
+    int finSection;
+    bool sectionOccupee;
+    int trainDansSection;
+
     QSemaphore mutex;
 
     int prioTrain1;
@@ -25,7 +30,12 @@ private:
 public:
 
     ChefQuai() : mutex(1){
-        secCrit = {33,24,0,-1}; // début section critique, fin section critique, 0: section libre / 1: utilisé, train dans la section
+        debutSection = 33;
+        finSection = 24;
+        sectionOccupee = false;
+        trainDansSection;
+
+        //secCrit = {33,24,0,-1}; // début section critique, fin section critique, 0: section libre / 1: utilisé, train dans la section
     }
 
     void regler_aiguillage(int numeroTrain, int nextPoint, int dev){
@@ -72,54 +82,80 @@ public:
 
     bool isDispo(int numeroTrain , int nextPoint, int sens){
         bool ok = true;
-        int posTab;
-        // test la première ou la seconde position du tableau de section critique en fonction du sens de marche
-        if(sens == 1){
-            posTab = 0;
-        }else{
-            posTab = 1;
-        }
+        // test en fonction du sens de march du train
         mutex.acquire();
-        if(nextPoint == secCrit.at(posTab)){ // section critique
-            if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
-                if(secCrit.at(2) == 0 || secCrit.at(3) == numeroTrain){
-                    secCrit.at(2) = 1;
-                    secCrit.at(3) = numeroTrain;
-                    ok = true;
+        if(sens == 1){
+            if(nextPoint == debutSection){ // section critique
+                if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
+                    if(sectionOccupee == false || trainDansSection == numeroTrain){
+                        sectionOccupee = true;
+                        trainDansSection = numeroTrain;
+                        afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " entre en section")));
+                        ok = true;
+                    }
+                    else{
+                        ok = false;
+                    }
                 }
                 else{
-                    ok = false;
+                    // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
+                    if(trainDansSection == numeroTrain){
+                        ok = true;
+                    }
+                    else{
+                        ok = false;
+                    }
                 }
             }
-            else{
-                // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
-                if(secCrit.at(3) == numeroTrain){
-                    ok = true;
+        }else{
+            if(nextPoint == finSection){ // section critique
+                if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
+                    if(sectionOccupee == false || trainDansSection == numeroTrain){
+                        sectionOccupee = true;
+                        trainDansSection = numeroTrain;
+                        afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " entre en section")));
+                        ok = true;
+                    }
+                    else{
+                        ok = false;
+                    }
                 }
                 else{
-                    ok = false;
+                    // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
+                    if(trainDansSection == numeroTrain){
+                        ok = true;
+                    }
+                    else{
+                        ok = false;
+                    }
                 }
             }
         }
+
         mutex.release();
         return ok;
     }
 
     void changeSegment(int numeroTrain, int last, int sens){
-        int posTab;
+        mutex.acquire();
         // test la première ou la seconde position du tableau de section critique en fonction du sens de marche
         if(sens == 1){
-            posTab = 1;
+            // si le contact passé est le dernier de la section critique et que le train était dans la section critique
+            if(last == finSection && numeroTrain == trainDansSection){
+                sectionOccupee = false;
+                trainDansSection = -1;
+                afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
+            }
         }else{
-            posTab = 0;
+            // si le contact passé est le dernier de la section critique et que le train était dans la section critique
+            if(last == debutSection && numeroTrain == trainDansSection){
+                sectionOccupee = false;
+                trainDansSection = -1;
+                afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
+            }
         }
-        mutex.acquire();
 
-        // si le contact passé est le dernier de la section critique et que le train était dans la section critique
-        if(last == secCrit.at(posTab) && numeroTrain == secCrit.at(3)){
-            secCrit.at(2) = 0;
-            secCrit.at(3) = -1;
-        }
+
 
         mutex.release();
     }

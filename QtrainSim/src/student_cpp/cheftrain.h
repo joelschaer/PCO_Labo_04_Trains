@@ -56,8 +56,10 @@ public:
             // changement de sens après deux tours
             if(nbTours == 2){
                 loco->arreter();
+                afficher_message(qPrintable(QString("changer de sens")));
+                sleep(5);
                 loco->inverserSens();
-                sleep(2);
+                sleep(1);
                 sens *= -1;
                 nbTours = 0;
             }
@@ -82,14 +84,13 @@ public:
 
                 // test si la prochaine et la surprochaine section est libre
                 libre = chef->isDispo(numeroTrain, parcours->at(i), sens);
-                if(i < parcours->size()-1){
-                    libre &= chef->isDispo(numeroTrain, parcours->at(i+1), sens);
-                }
+                //if(i < parcours->size()-1){
+                    libre &= chef->isDispo(numeroTrain, parcours->at((i+1)%parcours->size()), sens);
+                //}
 
                 if(libre){
-
                     chef->regler_aiguillage(numeroTrain, parcours->at(i), SET_DEV_PAS);
-
+                    loco->demarrer();
                     attendre_contact(parcours->at(i));
                     chef->changeSegment(numeroTrain, parcours->at(i), sens);
 
@@ -125,14 +126,14 @@ public:
                         // Quesiton pour le prof : si le train repart d'ici, il y aura incrément de i et donc on saute l'attente d'un contact
                         while(true){
                             bool ok = chef->isDispo(numeroTrain,parcours->at(i), sens);
-                            ok &= chef->isDispo(numeroTrain,parcours->at(i+1), sens);
+                            ok &= chef->isDispo(numeroTrain,parcours->at((i+1)%parcours->size()), sens);
                             if(ok){
-                                sleep(1);
                                 break;
                             }
+                            sleep(3);
                         }
-
-                        loco->demarrer();
+                        i--;
+                        sleep(3);
 
                     }
                 }
