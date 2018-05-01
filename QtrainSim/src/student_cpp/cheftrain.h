@@ -84,9 +84,7 @@ public:
 
                 // test si la prochaine et la surprochaine section est libre
                 libre = chef->isDispo(numeroTrain, parcours->at(i), sens);
-                //if(i < parcours->size()-1){
-                    libre &= chef->isDispo(numeroTrain, parcours->at((i+1)%parcours->size()), sens);
-                //}
+                libre &= chef->isDispo(numeroTrain, parcours->at((i+1)%parcours->size()), sens);
 
                 if(libre){
                     chef->regler_aiguillage(numeroTrain, parcours->at(i), SET_DEV_PAS);
@@ -123,7 +121,6 @@ public:
                         loco->arreter();
                         sleep(2);
 
-                        // Quesiton pour le prof : si le train repart d'ici, il y aura incrément de i et donc on saute l'attente d'un contact
                         while(true){
                             bool ok = chef->isDispo(numeroTrain,parcours->at(i), sens);
                             ok &= chef->isDispo(numeroTrain,parcours->at((i+1)%parcours->size()), sens);

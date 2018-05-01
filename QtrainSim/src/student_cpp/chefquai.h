@@ -21,6 +21,7 @@ private:
     int finSection;
     bool sectionOccupee;
     int trainDansSection;
+    bool trainEnTrainDeSortir;
 
     QSemaphore mutex;
 
@@ -34,7 +35,7 @@ public:
         finSection = 24;
         sectionOccupee = false;
         trainDansSection;
-
+        trainEnTrainDeSortir = false;
         //secCrit = {33,24,0,-1}; // début section critique, fin section critique, 0: section libre / 1: utilisé, train dans la section
     }
 
@@ -138,19 +139,24 @@ public:
 
     void changeSegment(int numeroTrain, int last, int sens){
         mutex.acquire();
+        // nous devons assurer que le train ai passé le contact suivant le dernier de la séction critique avant que la séction soit libérée.
+        // Cela pour des raisons d'innercie et de vitesse de réaction des threads qui est relativement décalée.
+        if(trainEnTrainDeSortir == true && numeroTrain == trainDansSection){
+            sectionOccupee = false;
+            trainEnTrainDeSortir = false;
+            trainDansSection = -1;
+        }
         // test la première ou la seconde position du tableau de section critique en fonction du sens de marche
         if(sens == 1){
             // si le contact passé est le dernier de la section critique et que le train était dans la section critique
             if(last == finSection && numeroTrain == trainDansSection){
-                sectionOccupee = false;
-                trainDansSection = -1;
+                trainEnTrainDeSortir = true;
                 afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
             }
         }else{
             // si le contact passé est le dernier de la section critique et que le train était dans la section critique
             if(last == debutSection && numeroTrain == trainDansSection){
-                sectionOccupee = false;
-                trainDansSection = -1;
+                trainEnTrainDeSortir = true;
                 afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
             }
         }
