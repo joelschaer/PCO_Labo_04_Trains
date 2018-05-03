@@ -54,6 +54,8 @@ public:
             if(nbTours == 2){
                 loco->arreter();
                 afficher_message(qPrintable(QString("changer de sens")));
+
+                // nous devons attendre un moment pour attendre que la loco soit entièrement arrêtée avant de lui dire de changer de sens.
                 sleep(5);
                 loco->inverserSens();
                 sleep(1);
@@ -79,13 +81,19 @@ public:
 
         for (int i = 0; i < parcours->size(); i++) {
 
-                // test si la prochaine et la surprochaine section sont libres
+                // demand si la prochaine et la surprochaine section sont libres
                 libre = chef->isDispo(numeroTrain, parcours->at(i), parcours->at((i+1)%parcours->size()), sens);
 
                 if(libre){
+                    // la section est libre donc
+                    // le chef de train demande au chef de quai de régler les aiguillages pour qu'il puisse avancer
                     chef->regler_aiguillage(numeroTrain, parcours->at(i), SET_DEV_PAS);
+
+                    // on démare la loco au cas ou elle serait arrêtée.
                     loco->demarrer();
                     attendre_contact(parcours->at(i));
+
+                    // on a passé le segement on indique donc qu'on à passé le contact ( sera testé si dernier de la section critique afin de la libéréer
                     chef->changeSegment(numeroTrain, parcours->at(i), sens);
 
                     loco->afficherMessage(QString("I've reached contact no. %1.").arg(parcours->at(i)));
@@ -95,6 +103,7 @@ public:
                     if(numeroTrain == TRAIN_2){
                         loco->afficherMessage(qPrintable(QString("train devié")));
 
+                        // on pour savoir dans quel sens il faut prendre la section critique en fonction des prochains contact
                         switch(parcours->at(i)){
                         case 31:
                         case 33:
@@ -121,7 +130,7 @@ public:
                             chef->attendreLaSection();
                         }
 
-
+                        // il faut revenir d'un contact, car le train n'ayant pas avancer le contact suivant n'a pas encore été validé.
                         i--;
                         sleep(3);
 

@@ -96,60 +96,40 @@ public:
 
         // test en fonction du sens de march du train
         mutexSecCrit->acquire();
+
+        int debSec;
+
+        // enfonction du sens on défini le point de début et de fin de la section critique
         if(sens == 1){
+            debSec = debutSection;
+        }
+        else {
+            debSec = finSection;
+        }
 
-            if(nextPoint == debutSection || nextNextPoint == debutSection){ // section critique dans le sens normal
+        if(nextPoint == debSec || nextNextPoint == debSec){ // section critique dans le sens normal
 
-                //il faut que le train soit prioritaire pour qu'il soit autoriser a avancer
-                if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
+            //il faut que le train soit prioritaire pour qu'il soit autoriser a avancer
+            if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
 
-                    // si la section n'est pas occupée ou que le train est déjà dans la section on lui donne de droit d'avancer et il réserve la section critique.
-                    if(sectionOccupee == false || trainDansSection == numeroTrain){
-                        sectionOccupee = true;
-                        trainDansSection = numeroTrain;
-                        afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " entre en section")));
-                        ok = true;
-                    }
-                    else{
-                        ok = false;
-                    }
+                // si la section n'est pas occupée ou que le train est déjà dans la section on lui donne de droit d'avancer et il réserve la section critique.
+                if(sectionOccupee == false || trainDansSection == numeroTrain){
+                    sectionOccupee = true;
+                    trainDansSection = numeroTrain;
+                    afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " entre en section")));
+                    ok = true;
                 }
                 else{
-                    // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
-                    if(trainDansSection == numeroTrain){
-                        ok = true;
-                    }
-                    else{
-                        ok = false;
-                    }
+                    ok = false;
                 }
             }
-
-        }else{
-            if(nextPoint == finSection || nextNextPoint == finSection){ // section critique dans le sens inverse
-
-                //il faut que le train soit prioritaire pour qu'il soit autoriser a avancer
-                if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
-
-                    // si la section n'est pas occupée ou que le train est déjà dans la section on lui donne de droit d'avancer et il réserve la section critique.
-                    if(sectionOccupee == false || trainDansSection == numeroTrain){
-                        sectionOccupee = true;
-                        trainDansSection = numeroTrain;
-                        afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " entre en section")));
-                        ok = true;
-                    }
-                    else{
-                        ok = false;
-                    }
+            else{
+                // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
+                if(trainDansSection == numeroTrain){
+                    ok = true;
                 }
                 else{
-                    // si le train n'est pas prioritaire, mais qu'il est dans la section critique, on le laisse sortir.
-                    if(trainDansSection == numeroTrain){
-                        ok = true;
-                    }
-                    else{
-                        ok = false;
-                    }
+                    ok = false;
                 }
             }
         }
@@ -158,6 +138,8 @@ public:
     }
 
     void changeSegment(int numeroTrain, int last, int sens){
+
+
         mutexSecCrit->acquire();
         // nous devons assurer que le train ai passé le contact suivant le dernier de la séction critique avant que la séction soit libérée.
         // Cela pour des raisons d'innercie et de vitesse de réaction des threads qui est relativement décalée.
@@ -167,20 +149,23 @@ public:
             trainDansSection = -1;
             trainEnAttente->unlock();
         }
-        // test la première ou la seconde position du tableau de section critique en fonction du sens de marche
+
+        int finSec;
+
+        // on fonction du sens on défini le point de sortie de la section critique
         if(sens == 1){
-            // si le contact passé est le dernier de la section critique et que le train était dans la section critique
-            if(last == finSection && numeroTrain == trainDansSection){
-                trainEnTrainDeSortir = true;
-                afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
-            }
-        }else{
-            // si le contact passé est le dernier de la section critique et que le train était dans la section critique
-            if(last == debutSection && numeroTrain == trainDansSection){
-                trainEnTrainDeSortir = true;
-                afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
-            }
+            finSec = finSection;
+        } else {
+            finSec = debutSection;
         }
+
+        // si le contact passé est le dernier de la section critique et que le train était dans la section critique
+        // on indique que le train est entrain de sortir et qu'au prochain contact il faut libérer la section critique.
+        if(last == finSec && numeroTrain == trainDansSection){
+            trainEnTrainDeSortir = true;
+            afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
+        }
+
         mutexSecCrit->release();
     }
 
