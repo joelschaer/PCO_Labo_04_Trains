@@ -68,14 +68,14 @@ int cmain()
     diriger_aiguillage(23,  TOUT_DROIT, 0);
 
     //Initialisation de la locomotive du parcours intérieure
-    locomotive.fixerNumero(6);
+    locomotive.fixerNumero(9);
     locomotive.fixerVitesse(16);
     locomotive.fixerPosition(16, 23);
     locomotive.allumerPhares();
     locomotive.afficherMessage("Ready!");
 
     //Initialisation de la locomotive 2 du parcours extérieure
-    locomotive2.fixerNumero(8);
+    locomotive2.fixerNumero(6);
     locomotive2.fixerVitesse(10);
     locomotive2.fixerPosition(13, 19);
     locomotive2.allumerPhares();

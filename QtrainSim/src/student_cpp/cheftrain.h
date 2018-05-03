@@ -27,6 +27,7 @@ private:
     QList<int> *deviation1_inv;
     int deviationLength;
 
+
 public:
     ChefTrain(){}
 
@@ -79,8 +80,9 @@ public:
         for (int i = 0; i < parcours->size(); i++) {
 
                 // test si la prochaine et la surprochaine section est libre
-                libre = chef->isDispo(numeroTrain, parcours->at(i), sens);
-                libre &= chef->isDispo(numeroTrain, parcours->at((i+1)%parcours->size()), sens);
+
+                libre = chef->isDispo(numeroTrain, parcours->at(i), parcours->at((i+1)%parcours->size()), sens);
+                //libre &= chef->isDispo(numeroTrain, parcours->at(), sens);
 
                 if(libre){
                     chef->regler_aiguillage(numeroTrain, parcours->at(i), SET_DEV_PAS);
@@ -92,7 +94,7 @@ public:
                 }
                 else{
                     // le train dispose qu'une voie d'évitement donc il l'utilise si la section critique lui est reffusée.
-                    if(deviation1 != NULL){
+                    if(numeroTrain == TRAIN_2){
                         loco->afficherMessage(qPrintable(QString("train devié")));
 
                         switch(parcours->at(i)){
@@ -118,18 +120,18 @@ public:
                         sleep(5);
 
                         /*while(true){
-                            bool ok = chef->isDispo(numeroTrain,parcours->at(i), sens);
-                            ok &= chef->isDispo(numeroTrain,parcours->at((i+1)%parcours->size()), sens);
+                            bool ok = chef->isDispo(numeroTrain,parcours->at(i), parcours->at((i+1)%parcours->size()), sens);
+                            //ok &= chef->isDispo(numeroTrain,parcours->at((i+1)%parcours->size()), sens);
                             if(ok){
                                 break;
                             }
                             sleep(3);
                         }*/
 
-                        chef->attendreLaSection();
+                       chef->attendreLaSection();
 
                         i--;
-                        sleep(2);
+                        sleep(3);
 
                     }
                 }

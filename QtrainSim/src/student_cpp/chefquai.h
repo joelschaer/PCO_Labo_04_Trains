@@ -24,9 +24,9 @@ private:
     int trainDansSection;
     bool trainEnTrainDeSortir;
 
-    QMutex trainEnAttente;
-    QSemaphore mutexSecCrit;
-    QSemaphore mutexAiguillage;
+    QMutex* trainEnAttente;
+    QSemaphore* mutexSecCrit;
+    QSemaphore* mutexAiguillage;
 
 
     int prioTrain1;
@@ -34,17 +34,21 @@ private:
 
 public:
 
-    ChefQuai() : mutexSecCrit(1), trainDansSection(0), mutexAiguillage(1){
+    ChefQuai(){
         debutSection = 33;
         finSection = 24;
         sectionOccupee = false;
-        trainDansSection;
         trainEnTrainDeSortir = false;
         //secCrit = {33,24,0,-1}; // début section critique, fin section critique, 0: section libre / 1: utilisé, train dans la section
+        trainDansSection = -1;
+
+        trainEnAttente = new QMutex();
+        mutexSecCrit = new QSemaphore(1);
+        mutexAiguillage = new QSemaphore(1);
     }
 
     void regler_aiguillage(int numeroTrain, int nextPoint, int dev){
-        mutexAiguillage.acquire();
+        mutexAiguillage->acquire();
         if(numeroTrain == TRAIN_1){
             switch(nextPoint){
             case 33:   // 24 et 33 nécessaire dans le cas ou un contact est sauté lors d'un arrêt
@@ -82,15 +86,15 @@ public:
                 }
             }
         }
-        mutexAiguillage.release();
+        mutexAiguillage->release();
     }
 
-    bool isDispo(int numeroTrain , int nextPoint, int sens){
+    bool isDispo(int numeroTrain , int nextPoint, int nextNextPoint, int sens){
         bool ok = true;
         // test en fonction du sens de march du train
-        mutexSecCrit.acquire();
+        mutexSecCrit->acquire();
         if(sens == 1){
-            if(nextPoint == debutSection){ // section critique
+            if(nextPoint == debutSection || nextNextPoint == debutSection){ // section critique
                 if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
                     if(sectionOccupee == false || trainDansSection == numeroTrain){
                         sectionOccupee = true;
@@ -113,7 +117,7 @@ public:
                 }
             }
         }else{
-            if(nextPoint == finSection){ // section critique
+            if(nextPoint == finSection || nextNextPoint == finSection){ // section critique
                 if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
                     if(sectionOccupee == false || trainDansSection == numeroTrain){
                         sectionOccupee = true;
@@ -137,19 +141,19 @@ public:
             }
         }
 
-        mutexSecCrit.release();
+        mutexSecCrit->release();
         return ok;
     }
 
-    void changeSegment(int numeroTrain, int last, int sens){
-        mutexSecCrit.acquire();
+    void changeSegFment(int numeroTrain, int last, int sens){
+        mutexSecCrit->acquire();
         // nous devons assurer que le train ai passé le contact suivant le dernier de la séction critique avant que la séction soit libérée.
         // Cela pour des raisons d'innercie et de vitesse de réaction des threads qui est relativement décalée.
         if(trainEnTrainDeSortir == true && numeroTrain == trainDansSection){
             sectionOccupee = false;
             trainEnTrainDeSortir = false;
             trainDansSection = -1;
-            trainEnAttente.unlock();
+            trainEnAttente->unlock();
         }
         // test la première ou la seconde position du tableau de section critique en fonction du sens de marche
         if(sens == 1){
@@ -165,18 +169,18 @@ public:
                 afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
             }
         }
-        mutexSecCrit.release();
+        mutexSecCrit->release();
     }
 
     void setPrioTrain (int prioTrain1, int prioTrain2){
-        mutexSecCrit.acquire();
+        mutexSecCrit->acquire();
         this->prioTrain1 = prioTrain1;
         this->prioTrain2 = prioTrain2;
-        mutexSecCrit.release();
+        mutexSecCrit->release();
     }
 
     void attendreLaSection(){
-        trainEnAttente.lock();
+        trainEnAttente->lock();
     }
 
 };
