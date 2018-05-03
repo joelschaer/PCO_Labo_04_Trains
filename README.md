@@ -74,6 +74,10 @@ Les threads qui gère les trains n'ont donc jamais besoin de se préocuper des p
 Nous avons choisi de séparer la gestion du circuit en deux entités. Les chefs de trains a raison d'un chef par train et le chef de quai qui fait office de point de contact unique. Les chefs de trains doivent donc se référer à cette entité commune pour chaqune des action qui n'est pas propore à la locomotive. De cette manière le point de contact entre les trains est partagé et il est possible de gérer les interractions sans que celle-ci n'interfèrent entre elles.
 Pour faire une gestion de concurence une entité commune est indispensable et il nous parrait être le plus simple de faire cette gestion par une entité indépendante plutôt que de l'intégrer avec des ressources partages entre les objets de chef de trains.
 
+Afin de prévoir le changement des aiguillages sur les maquettes nous avons anticipé la détéction à un contact d'avance, au lieu de tester le contact après l'aiguillage on test le contact avant l'aiguillage.
+
+Afin de pouvoir accéder à la section critique (tronçon en commun) chaque Chef de train essaie de réserver celle-ci. Cette réservation se fait au contact `i` (prochain contact de la section critique) puis elle se fait au contact `i+1` (contact suivant dans la section critique). Lorsque le test est effectué sur un point i, la disponibilité de la section critique est alors donnée au Chef de train, on test une deuxième fois avec `i+1` afin de prévoir les cas (changement de sens etc...) ou le Chef de train n'aurait pas eu le temps de tester le contact à `i`. De ce fait la section critique est réservée assez tôt avant d'y entrer afin d'éviter que l'autre locomotive lui passe devant.
+
 ### Etapes
 
 Les étapes de développement on été les suivantes :
