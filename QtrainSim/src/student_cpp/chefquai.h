@@ -6,6 +6,7 @@
 #include <vector>
 #include <QThread>
 #include <QSemaphore>
+#include <QMutex>
 
 #define TRAIN_1 1
 #define TRAIN_2 2
@@ -23,14 +24,17 @@ private:
     int trainDansSection;
     bool trainEnTrainDeSortir;
 
-    QSemaphore mutex;
+    QMutex trainEnAttente;
+    QSemaphore mutexSecCrit;
+    QSemaphore mutexAiguillage;
+
 
     int prioTrain1;
     int prioTrain2;
 
 public:
 
-    ChefQuai() : mutex(1){
+    ChefQuai() : mutexSecCrit(1), trainDansSection(0), mutexAiguillage(1){
         debutSection = 33;
         finSection = 24;
         sectionOccupee = false;
@@ -40,7 +44,7 @@ public:
     }
 
     void regler_aiguillage(int numeroTrain, int nextPoint, int dev){
-        mutex.acquire();
+        mutexAiguillage.acquire();
         if(numeroTrain == TRAIN_1){
             switch(nextPoint){
             case 33:   // 24 et 33 nécessaire dans le cas ou un contact est sauté lors d'un arrêt
@@ -78,13 +82,13 @@ public:
                 }
             }
         }
-        mutex.release();
+        mutexAiguillage.release();
     }
 
     bool isDispo(int numeroTrain , int nextPoint, int sens){
         bool ok = true;
         // test en fonction du sens de march du train
-        mutex.acquire();
+        mutexSecCrit.acquire();
         if(sens == 1){
             if(nextPoint == debutSection){ // section critique
                 if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
@@ -133,18 +137,19 @@ public:
             }
         }
 
-        mutex.release();
+        mutexSecCrit.release();
         return ok;
     }
 
     void changeSegment(int numeroTrain, int last, int sens){
-        mutex.acquire();
+        mutexSecCrit.acquire();
         // nous devons assurer que le train ai passé le contact suivant le dernier de la séction critique avant que la séction soit libérée.
         // Cela pour des raisons d'innercie et de vitesse de réaction des threads qui est relativement décalée.
         if(trainEnTrainDeSortir == true && numeroTrain == trainDansSection){
             sectionOccupee = false;
             trainEnTrainDeSortir = false;
             trainDansSection = -1;
+            trainEnAttente.unlock();
         }
         // test la première ou la seconde position du tableau de section critique en fonction du sens de marche
         if(sens == 1){
@@ -160,19 +165,22 @@ public:
                 afficher_message(qPrintable(QString("loco " + QString::number(numeroTrain) + " sort de section")));
             }
         }
-
-
-
-        mutex.release();
+        mutexSecCrit.release();
     }
 
     void setPrioTrain (int prioTrain1, int prioTrain2){
-        mutex.acquire();
+        mutexSecCrit.acquire();
         this->prioTrain1 = prioTrain1;
         this->prioTrain2 = prioTrain2;
-        mutex.release();
+        mutexSecCrit.release();
+    }
+
+    void attendreLaSection(){
+        trainEnAttente.lock();
     }
 
 };
+
+
 
 #endif // CHEFTRAIN_H

@@ -27,8 +27,6 @@ private:
     QList<int> *deviation1_inv;
     int deviationLength;
 
-    QSemaphore* mutex;
-
 public:
     ChefTrain(){}
 
@@ -43,8 +41,6 @@ public:
 
         this->numeroTrain = numeroTrain;
         this->sens = 1;
-
-        this->mutex = new QSemaphore(1);
     }
 
     void run()Q_DECL_OVERRIDE{
@@ -119,18 +115,21 @@ public:
                     else{
                         loco->afficherMessage(qPrintable(QString("stop")));
                         loco->arreter();
-                        sleep(2);
+                        sleep(5);
 
-                        while(true){
+                        /*while(true){
                             bool ok = chef->isDispo(numeroTrain,parcours->at(i), sens);
                             ok &= chef->isDispo(numeroTrain,parcours->at((i+1)%parcours->size()), sens);
                             if(ok){
                                 break;
                             }
                             sleep(3);
-                        }
+                        }*/
+
+                        chef->attendreLaSection();
+
                         i--;
-                        sleep(3);
+                        sleep(2);
 
                     }
                 }
@@ -168,7 +167,6 @@ public:
     ~ChefTrain(){
         delete parcours;
         delete deviation1_inv;
-        delete mutex;
     }
 }; // fin ChefTrain
 
