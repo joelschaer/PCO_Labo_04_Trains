@@ -1,3 +1,21 @@
+/***
+ *
+ * Autheurs : Joel Schär, Yann Lederrey
+ *
+ * Description : Classe ayant le rôle de controlleur de locomotive.
+ * Elle permet de faire la liaison entre une locomotive et un ChefQuai.
+ *
+ * runParcours : permet d'avancer sur le parcours prédéfinis auparavent.
+ *
+ * runDeviation : avancer sur le parcours de déviation dans le cas
+ * ou une locomotive doit effectuer une déviation.
+ *
+ * setDev : permet de définir la déviation.
+ *
+ * stopTrain : permet d'arreter une locmotive.
+ */
+
+
 #ifndef CHEFTRAIN_H
 #define CHEFTRAIN_H
 

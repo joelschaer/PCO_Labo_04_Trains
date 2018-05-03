@@ -1,3 +1,25 @@
+/***
+ *
+ * Autheurs : Joel Schär, Yann Lederrey
+ *
+ * Description : Class ayant pour rôle de gérer le tronçon commun
+ * , section critique des différentes locmotive(ChefTrain). Elle
+ * permet de gérer aussi les aiguillages, ainsi que les priorités.
+ *
+ * isDispo : permet d'informer une ChefTrain si la section critique
+ * est disponnible ou pas.
+ *
+ * regler_aiguillage : permet de régler l'aiguillage selon les informations
+ * sur la position actuel et à venir du train.
+ *
+ * changeSegment : permet d'informer qu'une locomotive passe sur des capteurs
+ * dans la section critique afin de savoir si il sort de la section critique.
+ *
+ * setPrioTrain : permet des redéfinier les priorités des locomotives.
+ *
+ * attendreLaSection : permet de mettre un attente une locomotive/ChefTrain
+ */
+
 #ifndef CHEFQUAI_H
 #define CHEFQUAI_H
 
