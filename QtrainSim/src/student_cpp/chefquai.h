@@ -17,7 +17,6 @@
 class ChefQuai{
 
 private:
-    //std::vector<int> secCrit;
     int debutSection;
     int finSection;
     bool sectionOccupee;
@@ -39,7 +38,6 @@ public:
         finSection = 24;
         sectionOccupee = false;
         trainEnTrainDeSortir = false;
-        //secCrit = {33,24,0,-1}; // début section critique, fin section critique, 0: section libre / 1: utilisé, train dans la section
         trainDansSection = -1;
 
         trainEnAttente = new QMutex();
@@ -47,6 +45,7 @@ public:
         mutexAiguillage = new QSemaphore(1);
     }
 
+    // règle les aiguillage sur demande des chefs de train.
     void regler_aiguillage(int numeroTrain, int nextPoint, int dev){
         mutexAiguillage->acquire();
         if(numeroTrain == TRAIN_1){
@@ -89,13 +88,22 @@ public:
         mutexAiguillage->release();
     }
 
+    // sur demande des chef de train indique si le tronçon demandé est libre d'accès.
+    // pour prendre des dispositions suffisamment vite nous testons la prochaine section et la surprochaine section.
     bool isDispo(int numeroTrain , int nextPoint, int nextNextPoint, int sens){
-        bool ok = true;
+
+        bool ok = true; // si le prochain ou le surprochain contact demandé n'est pas le premier de la section critique le train est de tt façon autorisé à avancé.
+
         // test en fonction du sens de march du train
         mutexSecCrit->acquire();
         if(sens == 1){
-            if(nextPoint == debutSection || nextNextPoint == debutSection){ // section critique
+
+            if(nextPoint == debutSection || nextNextPoint == debutSection){ // section critique dans le sens normal
+
+                //il faut que le train soit prioritaire pour qu'il soit autoriser a avancer
                 if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
+
+                    // si la section n'est pas occupée ou que le train est déjà dans la section on lui donne de droit d'avancer et il réserve la section critique.
                     if(sectionOccupee == false || trainDansSection == numeroTrain){
                         sectionOccupee = true;
                         trainDansSection = numeroTrain;
@@ -116,9 +124,14 @@ public:
                     }
                 }
             }
+
         }else{
-            if(nextPoint == finSection || nextNextPoint == finSection){ // section critique
+            if(nextPoint == finSection || nextNextPoint == finSection){ // section critique dans le sens inverse
+
+                //il faut que le train soit prioritaire pour qu'il soit autoriser a avancer
                 if((numeroTrain == TRAIN_1 && prioTrain1 == 1) || (numeroTrain == TRAIN_2 && prioTrain2 == 1)){
+
+                    // si la section n'est pas occupée ou que le train est déjà dans la section on lui donne de droit d'avancer et il réserve la section critique.
                     if(sectionOccupee == false || trainDansSection == numeroTrain){
                         sectionOccupee = true;
                         trainDansSection = numeroTrain;
@@ -140,12 +153,11 @@ public:
                 }
             }
         }
-
         mutexSecCrit->release();
         return ok;
     }
 
-    void changeSegFment(int numeroTrain, int last, int sens){
+    void changeSegment(int numeroTrain, int last, int sens){
         mutexSecCrit->acquire();
         // nous devons assurer que le train ai passé le contact suivant le dernier de la séction critique avant que la séction soit libérée.
         // Cela pour des raisons d'innercie et de vitesse de réaction des threads qui est relativement décalée.
@@ -176,6 +188,7 @@ public:
         mutexSecCrit->acquire();
         this->prioTrain1 = prioTrain1;
         this->prioTrain2 = prioTrain2;
+        trainEnAttente->unlock();
         mutexSecCrit->release();
     }
 

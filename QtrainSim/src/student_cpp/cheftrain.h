@@ -79,10 +79,8 @@ public:
 
         for (int i = 0; i < parcours->size(); i++) {
 
-                // test si la prochaine et la surprochaine section est libre
-
+                // test si la prochaine et la surprochaine section sont libres
                 libre = chef->isDispo(numeroTrain, parcours->at(i), parcours->at((i+1)%parcours->size()), sens);
-                //libre &= chef->isDispo(numeroTrain, parcours->at(), sens);
 
                 if(libre){
                     chef->regler_aiguillage(numeroTrain, parcours->at(i), SET_DEV_PAS);
@@ -119,16 +117,10 @@ public:
                         loco->arreter();
                         sleep(5);
 
-                        /*while(true){
-                            bool ok = chef->isDispo(numeroTrain,parcours->at(i), parcours->at((i+1)%parcours->size()), sens);
-                            //ok &= chef->isDispo(numeroTrain,parcours->at((i+1)%parcours->size()), sens);
-                            if(ok){
-                                break;
-                            }
-                            sleep(3);
-                        }*/
+                        while(!chef->isDispo(numeroTrain,parcours->at(i), parcours->at((i+1)%parcours->size()), sens)){
+                            chef->attendreLaSection();
+                        }
 
-                       chef->attendreLaSection();
 
                         i--;
                         sleep(3);
@@ -162,7 +154,6 @@ public:
     }
 
     void stopTrain(){
-
         loco->arreter();
     }
 

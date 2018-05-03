@@ -93,10 +93,9 @@ int cmain()
     chefTrain1->start();
     chefTrain2->start();
 
+    // gestion de la sélection de priorités.
     afficher_message("commands are : 1 = train 1 prio , 2 = train 2 prio, 3 = no priority");
-
     while(true){
-
         QString command = getCommand();
         afficher_message(qPrintable(QString("Your command is: ") + command));
 
