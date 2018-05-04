@@ -102,8 +102,7 @@ SOURCES += \
     src/voieaiguillageenroule.cpp \
     src/voieaiguillagetriple.cpp \
     src/ctrain_handler.cpp \
-    src/student_cpp/locomotive.cpp \
-    src/student_cpp/cheftrain.cpp
+    src/student_cpp/locomotive.cpp
 
 HEADERS += \
     src/mainwindow.h \
